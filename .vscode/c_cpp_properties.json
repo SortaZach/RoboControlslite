@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "AVR",
+            "includePath": [
+                "C:/AVR-GCC/avr/include",
+                "C:/AVR-GCC/avr/lib"
+            ],
+            "defines": [
+                "F_CPU=16000000UL"
+            ],
+            "compilerPath": "C:/AVR-GCC/bin/avr-gcc.exe",
+            "intelliSenseMode": "gcc-x86",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
