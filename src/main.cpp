@@ -1,12 +1,19 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 
 // PORTB is Digital Pins 8-13
 // PORTC is Analog Pins A0-A5
 // PORTD is Digital Pins 0-6
 #define LED_PIN PD5 // Pin 05 on Arduino Uno
+#define SW_PIN PD4 // click
+#define DT_PIN PD3 // data (data and clock control input of wave)
+#define CLK_PIN PD2 // clock 
+
+volatile int brightness = 128; // inital brightness (0-255)
 
 void setupPWM();
+void setupRotaryEncoder();
 void setBrightness(uint8_t brightness);
 
 int main() {
@@ -62,6 +69,27 @@ void setupPWM(){
     TCCR0A |= (1 << COM0B1); // Clear OC0B on Compare Match, set at BOTTOM
     TCCR0A |= (1 << WGM00) | (1 << WGM01); // fast PWM Mode
     TCCR0B |= (1 << CS01);  // Set prescaler to 8 (PMW frequency = 976 Hz)
+}
+
+// Initialize Rotary Encoder (CLK = D2, DT = D3, SW = D4)
+void setupRotaryEncoder() {
+    DDRD &= ~((1 << CLK_PIN) | (1 << DT_PIN) | (1 << SW_PIN));  // Set as INPUT
+    PORTD |= (1 << CLK_PIN) | (1 << DT_PIN) | (1 << SW_PIN);  // Enable pull-up resistors
+
+    // Enable Interrupts for CLK and DT (External Interrupts on D2, D3)
+    EICRA |= (1 << ISC00) | (1 << ISC10);  // Trigger on any logical change
+    EIMSK |= (1 << INT0) | (1 << INT1);    // Enable INT0 (D2) and INT1 (D3)
+
+    sei();  // Enable Global Interrupts
+}
+
+// Interrupt Service Routine (ISR) for Rotary Encoder
+ISR(INT0_vect) {  // ISR for CLK (D2)
+    if (PIND & (1 << DT_PIN)) {  // Check DT state
+        if (brightness < 255) brightness += 5;  // Increase brightness
+    } else {
+        if (brightness > 0) brightness -= 5;  // Decrease brightness
+    }
 }
 
 void setBrightness(uint8_t brightness) {
