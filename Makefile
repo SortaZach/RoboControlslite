@@ -1,7 +1,7 @@
 MCU = atmega328p
 F_CPU = 16000000UL
 BAUD = 115200
-PORT = COM3
+PORT = COM4
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
