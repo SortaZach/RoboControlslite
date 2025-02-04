@@ -1,7 +1,7 @@
 MCU = atmega328p
 F_CPU = 16000000UL
 BAUD = 115200
-PORT = COM4
+PORT = COM3
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -45,3 +45,6 @@ flash: $(TARGET).hex
 # Clean up build files
 clean:
 	rm -f $(OBJ_DIR)/*.o $(TARGET).hex $(TARGET).elf
+
+open:
+	python -m reciever_output.py
