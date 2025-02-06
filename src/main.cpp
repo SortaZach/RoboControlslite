@@ -4,6 +4,7 @@
 
 #define JOYSTICK_X PC0
 #define JOYSTICK_Y PC1
+#define JOYSTICK_PRESSED PD5
 
 void setupADC();
 uint16_t readADC(uint8_t channel);
@@ -20,12 +21,27 @@ int main(){
     while(1) {
         uint16_t xValue = readADC(JOYSTICK_X); 
         uint16_t yValue = readADC(JOYSTICK_Y);
+        uint16_t swValue = 0; // false or not pressed
+
+        // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
+        DDRD &= ~(1 << JOYSTICK_PRESSED);
+        PORTD |= (1 << JOYSTICK_PRESSED);
+        
+        // Check if Joystick is pressed (LOW = Pressed)
+        // PIND  is a hardware register for AVR that stores the current state of all digital input pins on PORT D
+        // 
+        if(!(PIND & (1 << JOYSTICK_PRESSED))){
+            swValue = 1;
+        }
         
         uartPrint("{\"X\":");
         itoa(xValue, buffer, 10); // Convert ADC integer to string
         uartPrint(buffer);
         uartPrint(",\"Y\":");
         itoa(yValue, buffer, 10);
+        uartPrint(buffer);
+        uartPrint(",\"pressed\":");
+        itoa(swValue, buffer, 10);
         uartPrint(buffer);
         uartPrint("}\n");        
         

@@ -3,7 +3,7 @@ import json
 import os 
 
 
-SERIAL_PORT = "COM4"
+SERIAL_PORT = "COM3"
 BAUD_RATE = 9600
 
 ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) #Opens a serial connection with micro controller
@@ -20,8 +20,14 @@ while True:
         if line:
             clear_screen()
             try:
+                pressed = "none"
                 data = json.loads(line)
-                print(f" Joystick Data: X = {data['X']}, Y = {data['Y']}")
+                if data['pressed']==0:
+                    pressed = "false"
+                elif data['pressed']==1 :
+                    pressed = "true"
+                
+                print(f" Joystick Data: X = {data['X']}, Y = {data['Y']}, button pressed = {pressed}")
 
             except json.JSONDecodeError:
                 print("Recieved malformed data: ", line)
