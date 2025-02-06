@@ -3,7 +3,7 @@ import json
 import os 
 
 
-SERIAL_PORT = "COM3"
+SERIAL_PORT = "COM4"
 BAUD_RATE = 9600
 
 ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) #Opens a serial connection with micro controller
