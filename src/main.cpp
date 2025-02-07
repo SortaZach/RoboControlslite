@@ -12,7 +12,7 @@ uint16_t readADC(uint8_t channel);
 void setupUART();
 void uartTransmit(char data);
 void uartPrint(const char *str);
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1, uint16_t b1);
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1);
 
 int main(){
 
@@ -22,8 +22,8 @@ int main(){
     while(1) {
         uint16_t xValue = readADC(JOYSTICK_X); 
         uint16_t yValue = readADC(JOYSTICK_Y);
-        uint16_t swValue = 0; // false or not pressed
-        uint16_t b1Value = 0;
+        uint8_t swValue = 0; // false or not pressed
+        uint8_t b1Value = 0;
 
         // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
         DDRD &= ~(1 << JOYSTICK_PRESSED);
@@ -48,7 +48,7 @@ int main(){
 }
 
 
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1, uint16_t b1){
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1){
     char buffer[10];
     //Indenting to indicate JSON Formatting
     uartPrint("{\"input\":{");
