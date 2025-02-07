@@ -11,13 +11,13 @@ uint16_t readADC(uint8_t channel);
 void setupUART();
 void uartTransmit(char data);
 void uartPrint(const char *str);
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1);
 
 int main(){
 
     setupADC();
     setupUART();
 
-    char buffer[10]; // Buffer to store converted ADC values
     while(1) {
         uint16_t xValue = readADC(JOYSTICK_X); 
         uint16_t yValue = readADC(JOYSTICK_Y);
@@ -29,25 +29,29 @@ int main(){
         
         // Check if Joystick is pressed (LOW = Pressed)
         // PIND  is a hardware register for AVR that stores the current state of all digital input pins on PORT D
-        // 
+        // the & symbol is a bitwise and, meaning we can point to specific registers
         if(!(PIND & (1 << JOYSTICK_PRESSED))){
             swValue = 1;
         }
         
-
-        uartPrint("{\"X\":");
-        itoa(xValue, buffer, 10); // Convert ADC integer to string
-        uartPrint(buffer);
-        uartPrint(",\"Y\":");
-        itoa(yValue, buffer, 10);
-        uartPrint(buffer);
-        uartPrint(",\"pressed\":");
-        itoa(swValue, buffer, 10);
-        uartPrint(buffer);
-        uartPrint("}\n");        
-        
+        parseToJSON(xValue, yValue, swValue);
         _delay_ms(500); // Delay for readablity
     }
+}
+
+
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1){
+    char buffer[10];
+    //Indenting to indicate JSON Formatting
+    uartPrint("{\"input\":{");
+        uartPrint("\"js1\":{");
+            uartPrint("{\"X\":"); itoa(joyX1, buffer, 10); uartPrint(buffer); uartPrint("}");
+            uartPrint("{\"Y\":"); itoa(joyY1, buffer, 10); uartPrint(buffer); uartPrint("}");
+            uartPrint("{\"SW\":"); itoa(joySW1, buffer, 10); uartPrint(buffer); uartPrint("}");
+        uartPrint("}");
+    uartPrint("}");
+
+    uartPrint("\n");
 }
 
 // Analog to Digital Conversion (ADC)
