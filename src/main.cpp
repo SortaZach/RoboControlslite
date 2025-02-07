@@ -2,7 +2,7 @@
 #include <util/delay.h>
 #include <stdlib.h> // for itoa() conversion
 
-#define JOYSTICK_X PC0
+#define JOYSTICK_X PC2
 #define JOYSTICK_Y PC1
 #define JOYSTICK_PRESSED PD5
 
@@ -34,6 +34,7 @@ int main(){
             swValue = 1;
         }
         
+
         uartPrint("{\"X\":");
         itoa(xValue, buffer, 10); // Convert ADC integer to string
         uartPrint(buffer);
