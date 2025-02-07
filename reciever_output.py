@@ -23,8 +23,8 @@ while True:
                 pressed = "none"
                 data = json.loads(line)
                 
-                print(f" Joystick Data: X = {data['input']['js1']['X']}, Y = {data['input']['js1']['Y']}, button pressed = {data['input']['js1']['SW']}")
-
+                print(f"Joystick Data: X = {data['input']['js1']['X']}, Y = {data['input']['js1']['Y']}, SW = {data['input']['js1']['SW']}")
+                print(f"Button Data: b1 = {data['input']['buttons']['b1']}")
             except json.JSONDecodeError:
                 print("Recieved malformed data: ", line)
                 

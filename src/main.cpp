@@ -5,13 +5,14 @@
 #define JOYSTICK_X PC2
 #define JOYSTICK_Y PC1
 #define JOYSTICK_PRESSED PD5
+#define BUTTON_1 PD6
 
 void setupADC();
 uint16_t readADC(uint8_t channel);
 void setupUART();
 void uartTransmit(char data);
 void uartPrint(const char *str);
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1);
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1, uint16_t b1);
 
 int main(){
 
@@ -22,25 +23,32 @@ int main(){
         uint16_t xValue = readADC(JOYSTICK_X); 
         uint16_t yValue = readADC(JOYSTICK_Y);
         uint16_t swValue = 0; // false or not pressed
+        uint16_t b1Value = 0;
 
         // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
         DDRD &= ~(1 << JOYSTICK_PRESSED);
         PORTD |= (1 << JOYSTICK_PRESSED);
         
+        DDRD &= ~(1 << BUTTON_1);
+        PORTD |= (1 << BUTTON_1);
         // Check if Joystick is pressed (LOW = Pressed)
         // PIND  is a hardware register for AVR that stores the current state of all digital input pins on PORT D
         // the & symbol is a bitwise and, meaning we can point to specific registers
         if(!(PIND & (1 << JOYSTICK_PRESSED))){
             swValue = 1;
         }
+
+        if(!(PIND & (1 << BUTTON_1))){
+            b1Value = 1;
+        }
         
-        parseToJSON(xValue, yValue, swValue);
+        parseToJSON(xValue, yValue, swValue, b1Value);
         _delay_ms(500); // Delay for readablity
     }
 }
 
 
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1){
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1, uint16_t b1){
     char buffer[10];
     //Indenting to indicate JSON Formatting
     uartPrint("{\"input\":{");
@@ -48,6 +56,9 @@ void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1){
             uartPrint("\"X\":"); itoa(joyX1, buffer, 10); uartPrint(buffer); uartPrint(",");
             uartPrint("\"Y\":"); itoa(joyY1, buffer, 10); uartPrint(buffer); uartPrint(",");
             uartPrint("\"SW\":"); itoa(joySW1, buffer, 10); uartPrint(buffer); 
+        uartPrint("},");
+        uartPrint("\"buttons\":{");
+            uartPrint("\"b1\":"); itoa(b1 ,buffer, 10); uartPrint(buffer);
         uartPrint("}");
     uartPrint("}}");
 
