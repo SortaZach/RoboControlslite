@@ -45,11 +45,11 @@ void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint16_t joySW1){
     //Indenting to indicate JSON Formatting
     uartPrint("{\"input\":{");
         uartPrint("\"js1\":{");
-            uartPrint("{\"X\":"); itoa(joyX1, buffer, 10); uartPrint(buffer); uartPrint("}");
-            uartPrint("{\"Y\":"); itoa(joyY1, buffer, 10); uartPrint(buffer); uartPrint("}");
-            uartPrint("{\"SW\":"); itoa(joySW1, buffer, 10); uartPrint(buffer); uartPrint("}");
+            uartPrint("\"X\":"); itoa(joyX1, buffer, 10); uartPrint(buffer); uartPrint(",");
+            uartPrint("\"Y\":"); itoa(joyY1, buffer, 10); uartPrint(buffer); uartPrint(",");
+            uartPrint("\"SW\":"); itoa(joySW1, buffer, 10); uartPrint(buffer); 
         uartPrint("}");
-    uartPrint("}");
+    uartPrint("}}");
 
     uartPrint("\n");
 }

@@ -22,12 +22,8 @@ while True:
             try:
                 pressed = "none"
                 data = json.loads(line)
-                if data['pressed']==0:
-                    pressed = "false"
-                elif data['pressed']==1 :
-                    pressed = "true"
                 
-                print(f" Joystick Data: X = {data['X']}, Y = {data['Y']}, button pressed = {pressed}")
+                print(f" Joystick Data: X = {data['input']['js1']['X']}, Y = {data['input']['js1']['Y']}, button pressed = {data['input']['js1']['SW']}")
 
             except json.JSONDecodeError:
                 print("Recieved malformed data: ", line)
