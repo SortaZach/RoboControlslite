@@ -5,18 +5,27 @@
 #define JOYSTICK_X PC2
 #define JOYSTICK_Y PC1
 #define JOYSTICK_PRESSED PD5
+
+#define U1_TRIG_PIN PB1 // Pin 6
+#define U1_ECHO_PIN PB0 // pin 7
+
+// for buttons we can add a 0.1uf capcaitor to help debounce it if we're experence button bouncing (triggering multiple times)
+// we can also fix this in the code though using a _delay_ms(20) so it will create a small delay between button presses.
 #define BUTTON_1 PD6
 
 void setupADC();
 uint16_t readADC(uint8_t channel);
+void setupUltrasonic();
+uint16_t getDistance();
 void setupUART();
 void uartTransmit(char data);
 void uartPrint(const char *str);
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1);
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1);
 
 int main(){
 
     setupADC();
+    setupUltrasonic();
     setupUART();
 
     while(1) {
@@ -25,6 +34,7 @@ int main(){
         uint8_t swValue = 0; // false or not pressed
         uint8_t b1Value = 0;
 
+        uint16_t u1Value = getDistance(); // Get ultrasonic sensor reading
         // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
         DDRD &= ~(1 << JOYSTICK_PRESSED);
         PORTD |= (1 << JOYSTICK_PRESSED);
@@ -42,27 +52,9 @@ int main(){
             b1Value = 1;
         }
         
-        parseToJSON(xValue, yValue, swValue, b1Value);
+        parseToJSON(xValue, yValue, swValue, b1Value, u1Value);
         _delay_ms(500); // Delay for readablity
     }
-}
-
-
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1){
-    char buffer[10];
-    //Indenting to indicate JSON Formatting
-    uartPrint("{\"input\":{");
-        uartPrint("\"js1\":{");
-            uartPrint("\"X\":"); itoa(joyX1, buffer, 10); uartPrint(buffer); uartPrint(",");
-            uartPrint("\"Y\":"); itoa(joyY1, buffer, 10); uartPrint(buffer); uartPrint(",");
-            uartPrint("\"SW\":"); itoa(joySW1, buffer, 10); uartPrint(buffer); 
-        uartPrint("},");
-        uartPrint("\"buttons\":{");
-            uartPrint("\"b1\":"); itoa(b1 ,buffer, 10); uartPrint(buffer);
-        uartPrint("}");
-    uartPrint("}}");
-
-    uartPrint("\n");
 }
 
 // Analog to Digital Conversion (ADC)
@@ -88,6 +80,59 @@ uint16_t readADC(uint8_t channel){
     ADCSRA |= (1 << ADSC); // Start conversion
     while (ADCSRA & (1 << ADSC)); // Wait for conversion to complete
     return ADC; // Return 10-bit ADC value (0-1023)
+}
+
+void setupUltrasonic(){
+    DDRB &= ~(1 << U1_ECHO_PIN); // input
+    DDRB |= (1 << U1_TRIG_PIN); // output
+}
+
+uint16_t getDistance(){
+    PORTB &= ~(1 << U1_TRIG_PIN);
+    _delay_us(2);
+    PORTB |= (1 << U1_TRIG_PIN);
+    _delay_us(10); // 10 microseconds, this is used to measure.
+    PORTB &= ~(1 << U1_TRIG_PIN);
+    // Measure how long ECHO is HIGH
+    TCNT1 = 0; // TCNT1 is a timer that we're using and resetting here
+    uint16_t timeout = 30000;
+    while(!(PINB & (1 << U1_ECHO_PIN))){
+        if (--timeout == 0){ uartPrint("No ECHO Detected... **"); return 9999;}
+    }; // Wait for HIGH signal
+    
+    timeout = 30000; // reset timeout
+    while(PINB & (1 << U1_ECHO_PIN)) {
+        if(--timeout == 0){ uartPrint("ECHO stuck HIGH... **");return 9999;}
+        TCNT1++;
+        _delay_us(1); 
+    }
+    uartPrint("out loop");
+    // Convert time to distance (in cm)
+    return TCNT1 / 58; // Formula is ** Distance (cm) = Duration (us) / 58 **
+}
+
+
+
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1){
+    char buffer[10];
+    //Indenting to indicate JSON Formatting
+    uartPrint("{\"input\":{");
+        uartPrint("\"js1\":{");
+            uartPrint("\"X\":"); itoa(joyX1, buffer, 10); uartPrint(buffer); uartPrint(",");
+            uartPrint("\"Y\":"); itoa(joyY1, buffer, 10); uartPrint(buffer); uartPrint(",");
+            uartPrint("\"SW\":"); itoa(joySW1, buffer, 10); uartPrint(buffer); 
+        uartPrint("},");
+        
+        uartPrint("\"buttons\":{");
+            uartPrint("\"b1\":"); itoa(b1 ,buffer, 10); uartPrint(buffer);
+        uartPrint("}");
+    uartPrint("},");
+
+    uartPrint("\"outputs\":{");
+        uartPrint("\"u1\":"); itoa(u1, buffer, 10); uartPrint(buffer);
+    uartPrint("}}");
+
+    uartPrint("\n");
 }
 
 // Universal Asyncronous Reciver-Transmitter communication (currently can use the serial monitor in the Arduino IDE)

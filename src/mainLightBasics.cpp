@@ -4,7 +4,7 @@
 
 // PORTB is Digital Pins 8-13
 // PORTC is Analog Pins A0-A5
-// PORTD is Digital Pins 0-6
+// PORTD is Digital Pins 0-7
 #define LED_PIN PD5 // Pin 05 on Arduino Uno
 #define SW_PIN PD4 // click
 #define DT_PIN PD3 // data (data and clock control input of wave)

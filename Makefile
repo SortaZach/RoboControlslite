@@ -46,5 +46,5 @@ flash: $(TARGET).hex
 clean:
 	rm -f $(OBJ_DIR)/*.o $(TARGET).hex $(TARGET).elf
 
-open:
+run:
 	python -m reciever_output.py
