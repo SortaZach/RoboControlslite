@@ -32,6 +32,7 @@ class SensorGUI(QWidget):
         self.debug_output = QTextEdit()
         self.debug_output.setReadOnly(True)
 
+
         # Add to layout
         layout.addWidget(self.joystick_label)
         layout.addWidget(self.button_label)
