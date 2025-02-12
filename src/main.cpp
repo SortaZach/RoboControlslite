@@ -6,8 +6,8 @@
 #define JOYSTICK_Y PC1
 #define JOYSTICK_PRESSED PD5
 
-#define U1_TRIG_PIN PB1 // Pin 6
-#define U1_ECHO_PIN PB0 // pin 7
+#define U1_TRIG_PIN PB1 // Pin 9
+#define U1_ECHO_PIN PB2 // Pin 10 
 
 // for buttons we can add a 0.1uf capcaitor to help debounce it if we're experence button bouncing (triggering multiple times)
 // we can also fix this in the code though using a _delay_ms(20) so it will create a small delay between button presses.
@@ -20,7 +20,7 @@ uint16_t getDistance();
 void setupUART();
 void uartTransmit(char data);
 void uartPrint(const char *str);
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1);
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1);
 
 int main(){
 
@@ -34,7 +34,7 @@ int main(){
         uint8_t swValue = 0; // false or not pressed
         uint8_t b1Value = 0;
 
-        uint16_t u1Value = getDistance(); // Get ultrasonic sensor reading
+        // uint16_t u1Value = getDistance(); // Get ultrasonic sensor reading
         // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
         DDRD &= ~(1 << JOYSTICK_PRESSED);
         PORTD |= (1 << JOYSTICK_PRESSED);
@@ -52,7 +52,7 @@ int main(){
             b1Value = 1;
         }
         
-        parseToJSON(xValue, yValue, swValue, b1Value, u1Value);
+        parseToJSON(xValue, yValue, swValue, b1Value);
         _delay_ms(500); // Delay for readablity
     }
 }
@@ -113,7 +113,7 @@ uint16_t getDistance(){
 
 
 
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1){
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1){
     char buffer[10];
     //Indenting to indicate JSON Formatting
     uartPrint("{\"input\":{");
@@ -126,10 +126,10 @@ void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uin
         uartPrint("\"buttons\":{");
             uartPrint("\"b1\":"); itoa(b1 ,buffer, 10); uartPrint(buffer);
         uartPrint("}");
-    uartPrint("},");
+    //uartPrint("},");
 
-    uartPrint("\"outputs\":{");
-        uartPrint("\"u1\":"); itoa(u1, buffer, 10); uartPrint(buffer);
+    //uartPrint("\"outputs\":{");
+        //uartPrint("\"u1\":"); itoa(u1, buffer, 10); uartPrint(buffer);
     uartPrint("}}");
 
     uartPrint("\n");
