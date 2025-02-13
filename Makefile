@@ -47,4 +47,4 @@ clean:
 	rm -f $(OBJ_DIR)/*.o $(TARGET).hex $(TARGET).elf
 
 run:
-	python .\GUI\serial_reader.py
+	python .\GUI\main.py
