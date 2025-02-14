@@ -47,3 +47,13 @@ class JoystickWidget(QWidget):
             except KeyError:
                 pass #ignore missing data fields
     
+
+    def updateJoystick(self, new_x=None, new_y=None):
+        # we will use LERP (Linear interpolation) to smooth the readings of the joystick
+        # LERPs equation: new_value = current_value * (1 - alpha) + target_value * alpha
+        # alpha is a double between 0 and 1, current value is the value the sick is at
+        # the target value is the value the stick is "jumping" to
+        alpha = 0.2
+        self.current_x = self.current_x * (1 - alpha) + new_x * alpha
+        self.current_y = self.current_y * (1 - alpha) + new_y * alpha
+        self.update()
