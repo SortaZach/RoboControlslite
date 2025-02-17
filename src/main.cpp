@@ -20,7 +20,7 @@ uint16_t getDistance();
 void setupUART();
 void uartTransmit(char data);
 void uartPrint(const char *str);
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1);
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1);
 
 int main(){
 
@@ -33,8 +33,9 @@ int main(){
         uint16_t yValue = readADC(JOYSTICK_Y);
         uint8_t swValue = 0; // false or not pressed
         uint8_t b1Value = 0;
+        uint16_t u1 = 0;
 
-        // uint16_t u1Value = getDistance(); // Get ultrasonic sensor reading
+        uint16_t u1Value = getDistance(); // Get ultrasonic sensor reading
         // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
         DDRD &= ~(1 << JOYSTICK_PRESSED);
         PORTD |= (1 << JOYSTICK_PRESSED);
@@ -52,7 +53,7 @@ int main(){
             b1Value = 1;
         }
         
-        parseToJSON(xValue, yValue, swValue, b1Value);
+        parseToJSON(xValue, yValue, swValue, b1Value, u1Value);
         _delay_ms(500); // Delay for readablity
     }
 }
@@ -106,14 +107,13 @@ uint16_t getDistance(){
         TCNT1++;
         _delay_us(1); 
     }
-    uartPrint("out loop");
     // Convert time to distance (in cm)
     return TCNT1 / 58; // Formula is ** Distance (cm) = Duration (us) / 58 **
 }
 
 
 
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1){
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1){
     char buffer[10];
     //Indenting to indicate JSON Formatting
     uartPrint("{\"input\":{");
@@ -126,12 +126,12 @@ void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1){
         uartPrint("\"buttons\":{");
             uartPrint("\"b1\":"); itoa(b1 ,buffer, 10); uartPrint(buffer);
         uartPrint("}");
-    //uartPrint("},");
-
-    //uartPrint("\"outputs\":{");
-        //uartPrint("\"u1\":"); itoa(u1, buffer, 10); uartPrint(buffer);
+    uartPrint("},");
+    uartPrint("\"outputs\":{");
+        uartPrint("\"u1\":"); itoa(u1, buffer, 10); uartPrint(buffer);
     uartPrint("}}");
 
+    // always end a json or a print seciton with a \n
     uartPrint("\n");
 }
 

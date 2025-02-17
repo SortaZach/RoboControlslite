@@ -94,7 +94,7 @@ class VelocityWidget(QWidget):
 
         # factors
         accel_factor = 100.0 # Scale factor for how strongly we accelerate
-        friction = 0.5     # friction or drag coefficient
+        friction = 0.8       # friction or drag coefficient
         max_velocity = 1.0
         min_velocity = -1.0
 
