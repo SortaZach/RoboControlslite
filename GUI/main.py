@@ -5,6 +5,7 @@ from PyQt6.QtCore import QTimer
 from joystick_widget import JoystickWidget
 from buttons_widget import ButtonWidget
 from velocity_widget import VelocityWidget
+from ultrasonic_widget import UltrasonicWidget
 
 class mainDashboard(QMainWindow):
     def __init__(self):
@@ -21,17 +22,20 @@ class mainDashboard(QMainWindow):
         # Add Widgets
         self.joystick_widget = JoystickWidget()
         self.button_widget = ButtonWidget()
-        # start with a velocity of 0
         self.velocity_widget = VelocityWidget()
+        self.ultrasonic_widget = UltrasonicWidget()
 
         # Add Widgets to layout with positions
-        layout.addWidget(self.joystick_widget, 0, 0)
+        layout.addWidget(self.ultrasonic_widget, 0, 0)
+        layout.addWidget(self.joystick_widget, 1, 0)
         # layout.addWidget(self.button_widget, 0, 1) # Currently no buttons set up
-        layout.addWidget(self.velocity_widget, 0, 1)
+        layout.addWidget(self.velocity_widget, 1, 1)
+
 
         #Timer For data updates (also so we dont get a ton of repetative input)
         self.timer = QTimer()
         self.timer.timeout.connect(self.joystick_widget.update_data)
+        self.timer.timeout.connect(self.ultrasonic_widget.update_reading)
         self.timer.timeout.connect(self.update_dashboard)
         self.timer.start(16) # 60fps
         self.last_time = time.time() # Track last udate time

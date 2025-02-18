@@ -98,12 +98,12 @@ uint16_t getDistance(){
     TCNT1 = 0; // TCNT1 is a timer that we're using and resetting here
     uint16_t timeout = 30000;
     while(!(PINB & (1 << U1_ECHO_PIN))){
-        if (--timeout == 0){ uartPrint("No ECHO Detected... **"); return 9999;}
+        if (--timeout == 0){ return 9999;}
     }; // Wait for HIGH signal
     
     timeout = 30000; // reset timeout
     while(PINB & (1 << U1_ECHO_PIN)) {
-        if(--timeout == 0){ uartPrint("ECHO stuck HIGH... **");return 9999;}
+        if(--timeout == 0){ return 9999;}
         TCNT1++;
         _delay_us(1); 
     }
