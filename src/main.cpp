@@ -4,14 +4,18 @@
 
 #define JOYSTICK_X PC2
 #define JOYSTICK_Y PC1
-#define JOYSTICK_PRESSED PD5
+#define JOYSTICK_PRESSED PB3 // Pin 11
 
 #define U1_TRIG_PIN PB1 // Pin 9
 #define U1_ECHO_PIN PB2 // Pin 10 
 
+#define ROTARY_DIAL_CLK PB0 // Pin 8
+#define ROTARY_DIAL_DT PD7 // Pin7
+#define ROTARY_DIAL_SW PD6 // Pin 6
+
 // for buttons we can add a 0.1uf capcaitor to help debounce it if we're experence button bouncing (triggering multiple times)
 // we can also fix this in the code though using a _delay_ms(20) so it will create a small delay between button presses.
-#define BUTTON_1 PD6
+#define BUTTON_1 PB5
 
 void setupADC();
 uint16_t readADC(uint8_t channel);

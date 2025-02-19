@@ -19,6 +19,8 @@ class UltrasonicWidget(QWidget):
             u1 = data['outputs']['u1']
             if u1 == 9999:
                 self.sonic_label.setText("No object in Radars Range...")
+            elif u1 < 10: 
+                self.sonic_label.setText("TOO CLOSE!!!!")
             else:
                 self.sonic_label.setText(f"Current distance to closest object is {u1}cm")
             
