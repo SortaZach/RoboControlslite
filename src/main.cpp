@@ -9,9 +9,12 @@
 #define U1_TRIG_PIN PB1 // Pin 9
 #define U1_ECHO_PIN PB2 // Pin 10 
 
-#define ROTARY_DIAL_CLK PB0 // Pin 8
-#define ROTARY_DIAL_DT PD7 // Pin7
-#define ROTARY_DIAL_SW PD6 // Pin 6
+// Pin 2 and 3 are special because these are the only two
+// that are dedicated external interrupts, we would have to use a 
+// Pin change interrupt otherwise which isn't as fast
+#define ROTARY_DIAL_CLK PD2 // Pin 2 
+#define ROTARY_DIAL_DT PD3 // Pin 3
+#define ROTARY_DIAL_SW PD4 // Pin 4
 
 // for buttons we can add a 0.1uf capcaitor to help debounce it if we're experence button bouncing (triggering multiple times)
 // we can also fix this in the code though using a _delay_ms(20) so it will create a small delay between button presses.
@@ -20,6 +23,9 @@
 void setupADC();
 uint16_t readADC(uint8_t channel);
 void setupUltrasonic();
+void setupEncoder();
+volatile int encoder_value;
+
 uint16_t getDistance();
 void setupUART();
 void uartTransmit(char data);
@@ -31,6 +37,7 @@ int main(){
     setupADC();
     setupUltrasonic();
     setupUART();
+    setupEncoder();
 
     while(1) {
         uint16_t xValue = readADC(JOYSTICK_X); 
@@ -91,6 +98,39 @@ void setupUltrasonic(){
     DDRB &= ~(1 << U1_ECHO_PIN); // input
     DDRB |= (1 << U1_TRIG_PIN); // output
 }
+
+void setupEncoder(){
+    DDRD &= ~(1 << ROTARY_DIAL_CLK | 1 << ROTARY_DIAL_DT | 1 << ROTARY_DIAL_SW);
+    
+    // Enable the INT0 and INT1 for encoder (special interupts for the PD2 PD3)
+    // We're using the External Interupt Control Register A (EICRA) which configures
+    // when the INT0 and INT1 should trigger an interrupt
+    // Each interrupt has two bits that define its trigger condition that are mapped to ISCx1 and ISCx0
+    EICRA |= (1 << ISC00) | (1 << ISC10);
+
+    // The External Interrupt Mask Register (EIMSK) enables specific external interrupts
+    EIMSK |= (1 << INT0) | (1 << INT1);
+    
+    sei(); // needed to enable global interrupts (set enable interupts (sei))
+} 
+
+ISR(INT0_vect){
+    if(PIND & (1 << ROTARY_DIAL_CLK)){
+        encoder_value++;
+    } else {
+        encoder_value--;
+    }
+}
+
+// the ISR Triggers when PD2 changes
+ISR(INT1_vect){
+    if(PIND & (1 << ROTARY_DIAL_DT)){
+        encoder_value++;
+    } else {
+        encoder_value--;
+    }
+}
+
 
 uint16_t getDistance(){
     PORTB &= ~(1 << U1_TRIG_PIN);
