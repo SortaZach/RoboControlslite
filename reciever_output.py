@@ -25,7 +25,8 @@ while True:
                 
                 print(f"Joystick Data: X = {data['input']['js1']['X']}, Y = {data['input']['js1']['Y']}, SW = {data['input']['js1']['SW']}")
                 print(f"Button Data: b1 = {data['input']['buttons']['b1']}")
-                print(f"ultrasonic Sensor Data: u1 = {data['outputs']['u1']}")
+                print(f"Ultrasonic Sensor Data: u1 = {data['outputs']['u1']}")
+                print(f"Dial Reading: d1 = {data['input']['dials']['d1']}, SW = {data['input']['dials']['SW']}")
             except json.JSONDecodeError:
                 print("Recieved malformed data: ", line)
                 

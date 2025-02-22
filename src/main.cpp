@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/interrupt.h> // for sei() and interrupts
 #include <util/delay.h>
 #include <stdlib.h> // for itoa() conversion
 
@@ -30,7 +31,7 @@ uint16_t getDistance();
 void setupUART();
 void uartTransmit(char data);
 void uartPrint(const char *str);
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1);
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1, volatile int encoder_value, uint8_t d1SW);
 
 int main(){
 
@@ -45,7 +46,7 @@ int main(){
         uint8_t swValue = 0; // false or not pressed
         uint8_t b1Value = 0;
         uint16_t u1 = 0;
-        uint8_t
+        uint8_t d1SWValue = 0;
 
         uint16_t u1Value = getDistance(); // Get ultrasonic sensor reading
         // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
@@ -64,8 +65,12 @@ int main(){
         if(!(PIND & (1 << BUTTON_1))){
             b1Value = 1;
         }
+
+        if(!(PIND & (1 << ROTARY_DIAL_SW))){
+            d1SWValue = 1;
+        }
         
-        parseToJSON(xValue, yValue, swValue, b1Value, u1Value);
+        parseToJSON(xValue, yValue, swValue, b1Value, u1Value, encoder_value, d1SWValue);
         _delay_ms(500); // Delay for readablity
     }
 }
@@ -102,35 +107,43 @@ void setupUltrasonic(){
 
 void setupEncoder(){
     DDRD &= ~(1 << ROTARY_DIAL_CLK | 1 << ROTARY_DIAL_DT | 1 << ROTARY_DIAL_SW);
-    _delay_us(2);
+    _delay_us(10);
     // Enable the INT0 and INT1 for encoder (special interupts for the PD2 PD3)
     // We're using the External Interupt Control Register A (EICRA) which configures
     // when the INT0 and INT1 should trigger an interrupt
     // Each interrupt has two bits that define its trigger condition that are mapped to ISCx1 and ISCx0
-    EICRA |= (1 << ISC00) | (1 << ISC10);
-    _delay_us(2);
+    // EICRA |= (1 << ISC00) | (1 << ISC10);
+    
+    // we're setting it up so it only reads the rising edge
+    EICRA |= (1 << ISC01) | (1 << ISC00) | (1 << ISC11) | (1 << ISC10);
+    _delay_us(10);
     // The External Interrupt Mask Register (EIMSK) enables specific external interrupts
-    EIMSK |= (1 << INT0) | (1 << INT1);
-    _delay_us(2);
+    // we removed (1 << INT1)because we're not using the iNT1 anymore in the ISR
+    EIMSK |= (1 << INT0);
     sei(); // needed to enable global interrupts (set enable interupts (sei))
 } 
 
 ISR(INT0_vect){
+    // using bouces like this with dial rotary encoder isn't great
+    // because the person could click faster then the debounce can keep up
+    _delay_us(50);
     if(PIND & (1 << ROTARY_DIAL_CLK)){
-        encoder_value++;
-    } else {
-        encoder_value--;
-    }
+        if(PIND & (1 << ROTARY_DIAL_DT)){
+            encoder_value++;
+        }
+        else {
+            encoder_value--;
+        }
+    } 
 }
 
 // the ISR Triggers when PD2 changes
-ISR(INT1_vect){
+/* ISR(INT1_vect){
+    _delay_ms(50);
     if(PIND & (1 << ROTARY_DIAL_DT)){
         encoder_value++;
-    } else {
-        encoder_value--;
-    }
-}
+    } 
+} */
 
 
 uint16_t getDistance(){
@@ -158,7 +171,7 @@ uint16_t getDistance(){
 
 
 
-void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1){
+void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uint16_t u1, volatile int d1, uint8_t d1SW){
     char buffer[10];
     //Indenting to indicate JSON Formatting
     uartPrint("{\"input\":{");
@@ -169,9 +182,10 @@ void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uin
         uartPrint("},");
         uartPrint("\"buttons\":{");
             uartPrint("\"b1\":"); itoa(b1, buffer, 10); uartPrint(buffer);
-        uartPrint("}");
+        uartPrint("},");
         uartPrint("\"dials\":{");
-            uartPrint("\"d1\":"); itoa(d1, buffer, 10); uartPrint(buffer);
+            uartPrint("\"d1\":"); itoa(d1, buffer, 10); uartPrint(buffer); uartPrint(",");
+            uartPrint("\"SW\":"); itoa(d1SW, buffer, 10); uartPrint(buffer); 
         uartPrint("}");
     uartPrint("},");
     uartPrint("\"outputs\":{");

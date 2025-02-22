@@ -9,3 +9,11 @@ class DialWidget(QWidget):
         self.setLayout(layout)
 
         self.dial_label = QLabel("No Position...")
+        layout.addWidget(self.dial_label)
+
+    def get_current_dial_position(self);
+        d1 = "No reading..."
+        data = read_serial()
+        if data:
+            d1 = ['inputs']['d1']
+            self.dial_label.setText("dial position: ")
