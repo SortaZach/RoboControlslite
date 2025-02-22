@@ -7,6 +7,14 @@
 #define JOYSTICK_Y PC1
 #define JOYSTICK_PRESSED PB3 // Pin 11
 
+// We're using PB1 (could use PB2) specifically because we have access to Timer1 (16-bit timer) for our calculations.
+// This timer is needed for better servo calculations as well. You can use both PB1 and PB2 for two different uses.
+// Other timers are Timer0 (PD5, PD6 8-bit) (Timer 0 is also used for core functions like millis() and delay()) 
+// and Timer2(PD3, PB3 8-bit)  Timer2 can run asynchronously (with an external clock) if you ever need that functionality
+
+// if we need more than 2 servos connected, we can use time-multiplexes on PWM signals to drive up to 12 servos (like arduino)
+// This schedules teh pulses one after another and swithces teh output pin quickly in software. However, this is more advanced then
+// we're going in this project. Servos will be covered elsewhere. 
 #define U1_TRIG_PIN PB1 // Pin 9
 #define U1_ECHO_PIN PB2 // Pin 10 
 
