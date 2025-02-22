@@ -45,6 +45,7 @@ int main(){
         uint8_t swValue = 0; // false or not pressed
         uint8_t b1Value = 0;
         uint16_t u1 = 0;
+        uint8_t
 
         uint16_t u1Value = getDistance(); // Get ultrasonic sensor reading
         // turn on the Input for pressed use & for pointer otherwise we overwrite the entire DDRD register instead of just where the pin is
@@ -101,16 +102,16 @@ void setupUltrasonic(){
 
 void setupEncoder(){
     DDRD &= ~(1 << ROTARY_DIAL_CLK | 1 << ROTARY_DIAL_DT | 1 << ROTARY_DIAL_SW);
-    
+    _delay_us(2);
     // Enable the INT0 and INT1 for encoder (special interupts for the PD2 PD3)
     // We're using the External Interupt Control Register A (EICRA) which configures
     // when the INT0 and INT1 should trigger an interrupt
     // Each interrupt has two bits that define its trigger condition that are mapped to ISCx1 and ISCx0
     EICRA |= (1 << ISC00) | (1 << ISC10);
-
+    _delay_us(2);
     // The External Interrupt Mask Register (EIMSK) enables specific external interrupts
     EIMSK |= (1 << INT0) | (1 << INT1);
-    
+    _delay_us(2);
     sei(); // needed to enable global interrupts (set enable interupts (sei))
 } 
 
@@ -166,9 +167,11 @@ void parseToJSON(uint16_t joyX1, uint16_t joyY1, uint8_t joySW1, uint8_t b1, uin
             uartPrint("\"Y\":"); itoa(joyY1, buffer, 10); uartPrint(buffer); uartPrint(",");
             uartPrint("\"SW\":"); itoa(joySW1, buffer, 10); uartPrint(buffer); 
         uartPrint("},");
-        
         uartPrint("\"buttons\":{");
-            uartPrint("\"b1\":"); itoa(b1 ,buffer, 10); uartPrint(buffer);
+            uartPrint("\"b1\":"); itoa(b1, buffer, 10); uartPrint(buffer);
+        uartPrint("}");
+        uartPrint("\"dials\":{");
+            uartPrint("\"d1\":"); itoa(d1, buffer, 10); uartPrint(buffer);
         uartPrint("}");
     uartPrint("},");
     uartPrint("\"outputs\":{");

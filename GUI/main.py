@@ -6,6 +6,7 @@ from joystick_widget import JoystickWidget
 from buttons_widget import ButtonWidget
 from velocity_widget import VelocityWidget
 from ultrasonic_widget import UltrasonicWidget
+from dial_widget import DialWidget
 
 class mainDashboard(QMainWindow):
     def __init__(self):
@@ -24,9 +25,11 @@ class mainDashboard(QMainWindow):
         self.button_widget = ButtonWidget()
         self.velocity_widget = VelocityWidget()
         self.ultrasonic_widget = UltrasonicWidget()
+        self.dial_widget = DialWidget()
 
         # Add Widgets to layout with positions
         layout.addWidget(self.ultrasonic_widget, 0, 0)
+        layout.addWidget(self.dial_widget, 0, 1)
         layout.addWidget(self.joystick_widget, 1, 0)
         # layout.addWidget(self.button_widget, 0, 1) # Currently no buttons set up
         layout.addWidget(self.velocity_widget, 1, 1)
@@ -48,6 +51,7 @@ class mainDashboard(QMainWindow):
         
         joystick_x, joystick_y, joystick_sw = self.joystick_widget.get_current_joystick_data()
         self.velocity_widget.update_acceleration_input(joystick_x, dt=dt)
+        self.dial_widget.get_current_dial_position()
         return
 if __name__ == "__main__":
     app = QApplication(sys.argv)
