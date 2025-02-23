@@ -1,0 +1,135 @@
+# ATmega328p microcontroller info
+
+** Memory
+    - 32kb of flash (programming memory)
+    - 2kb SRAM (data memory)
+    - 1kb EEPORM
+
+** Clock: Up to 20 MHz (typically 16 MHz in aruduino applications)
+
+** Architecture: 8-bit RISC with 32 general purpose registers (R0-R31)
+
+** Power Management: Low-power sleep modes, watchdog timer, brown-out detection
+
+** Pin Layouts and Ports **
+
+    ** PORT B: 
+        - Pins: PB0 to PB5
+        - Funcitons: Digital I/O; PMW outputs (OC1A, OC1B, OC0A, OC0B)
+        - Arduino Mapping: Typically 8-13
+    ** PORT C:
+        - Pins: PC0 to PC5
+        - Functions: Digital I/O and Analog inputs (ADC channels 0-5)
+        - Arduino Mapping: Analog pins A0-A5
+    ** PORT D:
+        - Pins: PD0 to PD7
+        - Functions: Digital I/O; includes RX(PD0) and TX (PD1) for USART
+        - Arduino Mapping: Digital pins 0-7 on the Uno
+
+** Internal Registers and Architecture **
+
+    ** General-Purpose Registers (R0-R31):
+        These 32 registers are used by the CPU for arithmetic, logic and data manipulation
+    
+    ** Status Registers(SREG):
+        Holds flags such as Zero, Carry, Negative, and Interrupt Enable bits.
+    
+    ** Stack Pointer(SP):
+        Points to the top of the internal SRAM.
+    
+    ** Program Counter(PC):
+        Tracks the next instructions address.
+    
+    ** Special Function Registers (SFRs):
+        These include control registers for peripherals like ADC, Timers, USART, SPI and TWI (I2C).
+
+** Timers and Counters **
+
+    ** Timer0 (8-bit):
+        - Reslolution: 8-bit
+        - PWM Outputs: OC0A (typically PD6), OC0B (typically PD5)
+        - Usage: 
+            often used for system timings (millis(), delay() in arduino)
+
+    ** Timer1 (16-bit):
+        - Reslolution: 16-bit
+        - PWM Outputs: OC1A (typically PB1), OC1B (typically PB2)
+        - Usage:
+            Ideal for high Reslolution applications, like servo control and precise pulse-width modulation.
+
+    ** Timer2 (8-bit):
+        - Reslolution: 8-bit
+        - PWM Outputs: OC2A (typically PB3), OC2B(typically PD3)
+        - Unique feature:
+            Can operate asynchronously with an external clock source (useful for real-time clock designs and low-power applications)
+
+
+** Interupts **
+
+    ** External Interrupts:
+        INT0 and INT1:
+            - Located on PD2 and PD3 respectively.
+            - Configurable for low level, any edge, rising edge, or falling edge triggering.
+            - Controlled by EICRA (External Interrupt Control Register A) and enabled by EIMSK(External Interrupt Mask Register)
+        
+    ** Pin Change Interrupts:
+        - Avalible on almost all I/O pins (grouped by port)
+        - Allows you to detect a change on any configured pin using PCICR (Pin Change Interrupt Control Register) and PCMSK (Pin Change Mask Register) registers
+        
+    ** Other Interrupts:
+        - Timer Interrupts:
+            Each timer has associated Interrupts (overflow, compare match) for time-critical tasks.
+        
+        - USART, ADC, SPI, TWI Interupts:
+            For handling data transfer and conversion events.
+        
+        - Watchdog Timers:
+            Provides a safety reset mechanism if the system hangs.
+
+
+** Peripherals and Communication **
+
+    ** ADC (Analog-to-Digital Converter): 
+        - Reslolution: 10-bit (0-1023)
+        - Multiplexer: Can select from pu to 8 analog channels (PC0-PC5)
+        - Registers:
+            ADMUX: Selects reference voltage and channels
+            ADCSRA:  Controls the ADC operations (enable, start conversion, prescaler)
+
+    ** USART (Universal Synchronous/Asynchronous Recivier/Transmitter)
+        - Purpose: Serial Communication (e.g. with a computer or other microcontroller)
+        - Registers:
+            UCSRnA, UCSRnB, UCSRnC: Control and status registers.
+            UDRn: Data register for transmission and reception.
+
+    ** SPI (Serial Peripheral Interface)
+        - Role: High-speed Synchronous data transferwith peripherals (e.g. sensors, SD cards)
+        - Registers:
+            SPCR: SPI Control Register
+            SPSR: SPI Status Register
+            SPDR: SPI Data Register
+
+    ** TWI (I2C) Interface
+        - Alternative Name: Two-Wire Interface (TWI).
+        - Funcitions: Communication with I2C-compatible devices.
+        - Registers: 
+            TWBR: Bit rate setting
+            TWSR: Status and prescaler
+            TWAR: Own slave address
+            TWDR: Data register
+            TWCR: Control register
+        
+
+** Extra Features **
+
+** Watchdog timer:
+    built-in timer that can reset the microcontroller if it becomes unresponsive. Cofigured via the WDTCSR register
+
+** Brow-out Detection:
+    Monitors the supply voltage and resets the device if the voltage drogs too low, ensuring reliable operation.
+
+** Power-Saving Modes:
+    Various sleep modes allow you to reduce power consumption when the microcontroller is idle.
+
+** EEPROM:
+    Non-volatile memory for storing small amounts of data that must persist across resets.
