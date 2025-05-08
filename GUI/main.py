@@ -53,12 +53,13 @@ class mainDashboard(QMainWindow):
         self.velocity_widget.update_acceleration_input(joystick_x, dt=dt)
         self.dial_widget.get_current_dial_position()
         return
+
+# Most python scripts will use this if statement
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = mainDashboard()
     window.show()
     sys.exit(app.exec())
-
 
 
 
